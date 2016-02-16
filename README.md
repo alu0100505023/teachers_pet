@@ -16,7 +16,7 @@ Each class is an 'organization' on GitHub. This allows the instructors (GitHub o
 Each student is given a team in the organization. The team name is the same as the student's GitHub username.
 
 ## Expanded information
-[Instalation and user's guide](https://alu0100505023.gitbooks.io/teachers_pet/content)
+[Instalation and user's guide](https://alu0100505023.gitbooks.io/teachers_pet/content/)
 
 ## Related projects
 
