@@ -42,10 +42,50 @@ module TeachersPet
         opts
       end
 
+      def octokit_config_bash(username,password,token)
+        opts = {
+          api_endpoint: self.options[:api],
+          web_endpoint: self.options[:web],
+          login: self.options[:username],
+          # Organizations can get big, pull in all pages
+          auto_paginate: true
+        }
+        self.options[:token]=token
+        self.options[:username]=username
+        self.options[:password]=password
+
+        if self.options[:token]
+          if self.options[:token].eql?('token')
+            print 'Please enter your GitHub token: '
+            opts[:access_token] = STDIN.noecho(&:gets).chomp
+          else
+            opts[:access_token] = self.options[:token]
+          end
+        elsif self.options[:password]
+          if self.options[:password].eql?('password')
+            print 'Please enter your GitHub password: '
+            opts[:password] = STDIN.noecho(&:gets).chomp
+          else
+            opts[:password] = self.options[:password]
+          end
+        else
+          raise Thor::RequiredArgumentMissingError.new("No value provided for option --password or --token")
+        end
+
+        opts
+      end
+
       def init_client
         puts "=" * 50
         puts "Authenticating to GitHub..."
         octokit = Octokit::Client.new(self.octokit_config)
+        @client = TeachersPet::ClientDecorator.new(octokit)
+      end
+
+      def init_client_bash(username,password,token)
+        puts "=" * 50
+        puts "Authenticating to GitHub..."
+        octokit = Octokit::Client.new(self.octokit_config_bash(username,password,token))
         @client = TeachersPet::ClientDecorator.new(octokit)
       end
 

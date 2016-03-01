@@ -1,4 +1,4 @@
 require_relative 'bash_interface'
 
-op=Interface.new
-op.run
+#op=Interface.new
+#op.run

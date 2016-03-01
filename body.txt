@@ -1,1 +1,0 @@
-There is an error in the menu, check line 23 in main.rb

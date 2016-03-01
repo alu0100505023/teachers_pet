@@ -3,30 +3,30 @@ require 'json'
 require_rel '.'
 
 
+
 class Interface
   attr_reader :option
-  @config
+  attr_accessor :config
+  #@config
 
   def initialize
   end
 
-  def login
-    print 'todo'
-  end
 
   def load_config
     json = File.read('./lib/configure/configure.json')
     config=JSON.parse(json)
 
     if config["User"] == nil
-      #puts "Not loged"
       return false
     else
-      #puts "Loged"
-      #puts config["User"]
       @config=config
       return true
     end
+  end
+
+  def login(username,password,token)
+    TeachersPet::Actions::Base.new.init_client_bash(username,password,token)
   end
 
   def prompt(deep)
@@ -54,6 +54,9 @@ class Interface
   def lsl(deep)
   end
 
+  def cd(deep)
+  end
+
   def run
     ex=1
     deep=1
@@ -70,12 +73,21 @@ class Interface
           when op == "ls" then self.ls(deep)
           when op == "ls" then self.lsl(deep)
         end
-
       end
-
+    else
+      puts "User: "
+      user = gets.chomp
+      puts "Pass: "
+      pass = gets.chomp
+      puts "Token: "
+      token = gets.chomp
+      self.login(user,pass,token)
     end
   end
 
 end
-op=Interface.new
-op.run
+
+#Interface.new.run
+inp = Interface.new
+inp.load_config
+inp.login(inp.config["User"],inp.config["Pass"], inp.config["Token"])

@@ -2,6 +2,7 @@
 /instructors
 /students
 /teams
+/lib/configure/configure.json
 
 *.gem
 *.rbc
