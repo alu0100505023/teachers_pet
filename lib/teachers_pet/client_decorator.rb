@@ -54,6 +54,15 @@ module TeachersPet
             # https://github.com/octokit/octokit.rb/pull/518
             self.add_team_membership(team[:id], username, accept: 'application/vnd.github.the-wasp-preview+json')
             puts " -> @#{username} has been added to @#{organization}/#{team[:name]}"
+            #code add  from issue
+            # begin
+            #   self.add_team_membership(team[:id], username, accept: 'application/vnd.github.the-wasp-preview+json')
+            #   puts " -> @#{username} has been added to @#{organization}/#{team[:name]}"
+            # rescue
+            #   puts " -> Error adding user to team. #{username} might not exist."
+            #
+            # end
+            #end issue
           end
         end
       end
