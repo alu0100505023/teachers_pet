@@ -61,6 +61,8 @@ class Interface
         print "exit => exit from this program\n"
         print "ls => list your repositories of your organization\n"
         print "cd => go to the path\n"
+        print "members => members of a organization\n"
+        print "teams => teams of a organization\n"
         print "help => list of commands available\n\n"
       when @deep == 3
     end
@@ -69,12 +71,15 @@ class Interface
   def ls()
     case
       when @deep == 1
+        print "\n"
         repo=@client.repositories
         repo.each do |i|
           puts i.name
         end
       when @deep ==2
-        repos=@client.organization_repositories(@client["Org"])
+        #puts @config["Org"]
+        print "\n"
+        repos=@client.organization_repositories(@config["Org"])
         repos.each do |y|
           puts y.name
         end
@@ -107,9 +112,40 @@ class Interface
   def orgs()
     case
     when @deep=1
-      org=@client.organizations(@config["User"])
+      print "\n"
+      org=@client.organizations
       org.each do |i|
+        #puts i.inspect
+        split=i.inspect.split(',')
+        split=split[0].split('=>')
+        puts split[1]
+      end
+    end
+  end
+
+  def members()
+    case
+    when @deep=2
+      print "\n"
+      mem=@client.organization_members(@config["Org"])
+      mem.each do |i|
+        #puts i.name
+        #puts i.inspect
+        split=i.inspect.split(',')
+        split=split[0].split('=>')
+        puts split[1]
+      end
+    end
+  end
+
+  def teams()
+    case
+    when @deep=2
+      print "\n"
+      mem=@client.organization_teams(@config["Org"])
+      mem.each do |i|
         puts i.name
+        #puts i.inspect
       end
     end
   end
@@ -130,6 +166,9 @@ class Interface
           when op == "ls" then self.ls()
           when op == "ls -l" then self.lsl()
           when op == "orgs" then self.orgs()
+          when op == "cd .." then self.cdback()
+          when op == "members" then self.members()
+          when op == "teams" then self.teams()
         end
         if opcd[0]=="cd" and opcd[1]!=".."
           self.cd(opcd[1])
@@ -149,7 +188,6 @@ class Interface
 
     js=File.open('./lib/configure/configure2.json','w')
     js.write(@config.to_json)
-    puts @config
   end
 
 end
