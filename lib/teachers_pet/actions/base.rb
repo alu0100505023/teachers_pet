@@ -87,6 +87,7 @@ module TeachersPet
         puts "Authenticating to GitHub..."
         octokit = Octokit::Client.new(self.octokit_config_bash(username,password,token))
         @client = TeachersPet::ClientDecorator.new(octokit)
+        return @client
       end
 
       def read_file(filename)
