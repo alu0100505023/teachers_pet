@@ -1,7 +1,7 @@
 require 'require_all'
 require 'json'
 require_rel '.'
-
+require 'readline'
 
 
 class Interface
@@ -53,13 +53,13 @@ class Interface
         puts "\nList of commands.\n"
         print "exit => exit from this program\n"
         print "orgs => show your organizations\n"
-        print "ls => list your repositories\n"
+        print "repos => list your repositories\n"
         print "cd => go to the path\n"
         print "help => list of commands available\n\n"
       when @deep == 2
         puts "\nList of commands.\n"
         print "exit => exit from this program\n"
-        print "ls => list your repositories of your organization\n"
+        print "repos => list your repositories of your organization\n"
         print "cd => go to the path\n"
         print "members => members of a organization\n"
         print "teams => teams of a organization\n"
@@ -84,6 +84,7 @@ class Interface
           puts y.name
         end
     end
+    print "\n"
   end
 
   def lsl()
@@ -115,11 +116,10 @@ class Interface
       print "\n"
       org=@client.organizations
       org.each do |i|
-        #puts i.inspect
-        split=i.inspect.split(',')
-        split=split[0].split('=>')
-        puts split[1]
+        o=eval(i.inspect)
+        puts o[:login]
       end
+      print "\n"
     end
   end
 
@@ -129,13 +129,11 @@ class Interface
       print "\n"
       mem=@client.organization_members(@config["Org"])
       mem.each do |i|
-        #puts i.name
-        #puts i.inspect
-        split=i.inspect.split(',')
-        split=split[0].split('=>')
-        puts split[1]
+        m=eval(i.inspect)
+        puts m[:login]
       end
     end
+    print "\n"
   end
 
   def teams()
@@ -145,9 +143,9 @@ class Interface
       mem=@client.organization_teams(@config["Org"])
       mem.each do |i|
         puts i.name
-        #puts i.inspect
       end
     end
+    print "\n"
   end
 
   def run
@@ -156,14 +154,12 @@ class Interface
       self.login(@config["User"],@config["Pass"], @config["Token"])
 
       while ex != 0
-        print self.prompt()
-        STDOUT.flush
-        op = gets.chomp
+        op=Readline.readline(self.prompt,true)
         opcd=op.split
         case
           when op == "exit" then ex=0
           when op == "help" then self.help()
-          when op == "ls" then self.ls()
+          when op == "repos" then self.ls()
           when op == "ls -l" then self.lsl()
           when op == "orgs" then self.orgs()
           when op == "cd .." then self.cdback()
