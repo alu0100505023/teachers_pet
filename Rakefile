@@ -7,5 +7,5 @@ task default: :spec
 
 desc "Run simple interace"
 task :bash do
-	sh "ruby lib/bash_interface.rb"
+	sh "ruby lib/bash_tp.rb"
 end

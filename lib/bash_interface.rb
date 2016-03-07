@@ -9,6 +9,7 @@ class Interface
   attr_accessor :config
   attr_accessor :client
   attr_accessor :deep
+  LIST = ['repos', 'exit', 'orgs','help', 'members','teams', 'cd', 'commits'].sort
 
   def initialize
   end
@@ -41,30 +42,23 @@ class Interface
 
   def prompt()
     case
-      when @deep == 1 then return @config["User"]+">"
-      when @deep == 2 then return @config["User"]+">"+@config["Org"]+">"
-      when @deep == 3 then return @config["User"]+">"+@config["Org"]+">"+@config["Repo"]+">"
+      when @deep == 1 then return @config["User"]+"> "
+      when @deep == 10 then return @config["User"]+">"+@config["Repo"]+"> "
+      when @deep == 2 then return @config["User"]+">"+@config["Org"]+"> "
+      when @deep == 3 then return @config["User"]+">"+@config["Org"]+">"+@config["Repo"]+"> "
     end
   end
 
   def help()
     case
       when @deep == 1
-        puts "\nList of commands.\n"
-        print "exit => exit from this program\n"
-        print "orgs => show your organizations\n"
-        print "repos => list your repositories\n"
-        print "cd => go to the path\n"
-        print "help => list of commands available\n\n"
+        HelpM.new.user()
       when @deep == 2
-        puts "\nList of commands.\n"
-        print "exit => exit from this program\n"
-        print "repos => list your repositories of your organization\n"
-        print "cd => go to the path\n"
-        print "members => members of a organization\n"
-        print "teams => teams of a organization\n"
-        print "help => list of commands available\n\n"
+        HelpM.new.org()
       when @deep == 3
+        HelpM.new.org_repo()
+      when @deep == 10
+        HelpM.new.user_repo()
     end
   end
 
@@ -98,21 +92,28 @@ class Interface
         @config["Org"]=nil
         @deep=1
       when @deep == 3
+        @config["Repo"]=nil
         @deep=2
+      when @deep == 10
+        @config["Repo"]=nil
+        @deep=1
     end
   end
 
   def cd(path)
     case
-    when @deep=1
+    when @deep==1
       @config["Org"]=path
       @deep=2
+    when @deep==2
+      @config["Repo"]=path
+      @deep=3
     end
   end
 
   def orgs()
     case
-    when @deep=1
+    when @deep==1
       print "\n"
       org=@client.organizations
       org.each do |i|
@@ -125,7 +126,7 @@ class Interface
 
   def members()
     case
-    when @deep=2
+    when @deep==2
       print "\n"
       mem=@client.organization_members(@config["Org"])
       mem.each do |i|
@@ -136,9 +137,22 @@ class Interface
     print "\n"
   end
 
+  def commits()
+    print "\n"
+    case
+    when @deep==3
+      mem=@client.commits(@config["Org"]+"/"+@config["Repo"],"master")
+      mem.each do |i|
+        #puts i.inspect
+        m=eval(i.inspect)
+        puts m[:sha] + " " + m[:commit][:author][:name] + " "+m[:message]
+      end
+    end
+  end
+
   def teams()
     case
-    when @deep=2
+    when @deep==2
       print "\n"
       mem=@client.organization_teams(@config["Org"])
       mem.each do |i|
@@ -150,6 +164,12 @@ class Interface
 
   def run
     ex=1
+
+    comp = proc { |s| LIST.grep( /^#{Regexp.escape(s)}/ ) }
+
+    #Readline.completion_append_character = " "
+    Readline.completion_proc = comp
+
     if self.load_config == true
       self.login(@config["User"],@config["Pass"], @config["Token"])
 
@@ -165,6 +185,7 @@ class Interface
           when op == "cd .." then self.cdback()
           when op == "members" then self.members()
           when op == "teams" then self.teams()
+          when op == "commits" then self.commits()
         end
         if opcd[0]=="cd" and opcd[1]!=".."
           self.cd(opcd[1])
@@ -182,8 +203,7 @@ class Interface
       self.login(user,pass,token)
     end
 
-    js=File.open('./lib/configure/configure2.json','w')
-    js.write(@config.to_json)
+    File.write('./lib/configure/configure.json',@config.to_json)
   end
 
 end
@@ -191,4 +211,3 @@ end
 inp = Interface.new
 inp.load_config
 inp.run
-#inp.login(inp.config["User"],inp.config["Pass"], inp.config["Token"])
