@@ -9,7 +9,7 @@ class Interface
   attr_accessor :config
   attr_accessor :client
   attr_accessor :deep
-  LIST = ['repos', 'exit', 'orgs','help', 'members','teams', 'cd', 'commits'].sort
+  LIST = ['repos', 'exit', 'orgs','help', 'members','teams', 'cd ', 'commits','forks'].sort
 
   def initialize
   end
@@ -36,8 +36,6 @@ class Interface
 
     #puts client.password
     # opts=TeachersPet::Actions::Base.new.init_client_bash(username,password,token)
-    # puts opts
-    # puts opts.fields
   end
 
   def prompt()
@@ -63,12 +61,14 @@ class Interface
   end
 
   def ls()
+    memory=[]
     case
       when @deep == 1
         print "\n"
         repo=@client.repositories
         repo.each do |i|
           puts i.name
+          memory.push(i.name)
         end
       when @deep ==2
         #puts @config["Org"]
@@ -76,8 +76,13 @@ class Interface
         repos=@client.organization_repositories(@config["Org"])
         repos.each do |y|
           puts y.name
+          memory.push(y.name)
         end
     end
+    history=LIST+memory
+    comp = proc { |s| history.grep( /^#{Regexp.escape(s)}/ ) }
+    Readline.completion_append_character = ""
+    Readline.completion_proc = comp
     print "\n"
   end
 
@@ -144,10 +149,37 @@ class Interface
       mem=@client.commits(@config["Org"]+"/"+@config["Repo"],"master")
       mem.each do |i|
         #puts i.inspect
-        m=eval(i.inspect)
-        puts m[:sha] + " " + m[:commit][:author][:name] + " "+m[:message]
+        print i[:sha],"\n",i[:commit][:author][:name],"\n",i[:commit][:author][:date],"\n",i[:commit][:message],"\n\n"
+        #m=eval(i.inspect)
       end
     end
+    print "\n"
+  end
+
+  def show_forks()
+    print "\n"
+    case
+    when @deep==3
+      mem=@client.forks(@config["Org"]+"/"+@config["Repo"])
+      mem.each do |i|
+        puts i[:owner][:login]
+      end
+    end
+    print "\n"
+  end
+
+  def collaborators()
+    print "\n"
+    case
+    when @deep==3
+      mem=@client.collaborators(@config["Org"]+"/"+@config["Repo"])
+      mem.each do |i|
+        #puts i.name
+        puts i[:author][:login]
+        #m=eval(i.inspect)
+      end
+    end
+    print "\n"
   end
 
   def teams()
@@ -164,10 +196,12 @@ class Interface
 
   def run
     ex=1
-
+    memory=['Prueba']
+    history=LIST+memory
+    #comp = proc { |s| LIST.grep( /^#{Regexp.escape(s)}/ ) }
     comp = proc { |s| LIST.grep( /^#{Regexp.escape(s)}/ ) }
 
-    #Readline.completion_append_character = " "
+    Readline.completion_append_character = ""
     Readline.completion_proc = comp
 
     if self.load_config == true
@@ -186,6 +220,8 @@ class Interface
           when op == "members" then self.members()
           when op == "teams" then self.teams()
           when op == "commits" then self.commits()
+          when op == "col" then self.collaborators()
+          when op == "forks" then self.show_forks()
         end
         if opcd[0]=="cd" and opcd[1]!=".."
           self.cd(opcd[1])

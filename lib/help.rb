@@ -24,6 +24,7 @@ class HelpM
     puts "\nList of commands.\n"
     print "exit => exit from this program\n"
     print "commits => show the list of commits from the repository\n"
+    print "col => show the list of collaborators from the repository\n"
     print "help => list of commands available\n\n"
   end
 
@@ -31,6 +32,7 @@ class HelpM
     puts "\nList of commands.\n"
     print "exit => exit from this program\n"
     print "commits => show the list of commits from the repository\n"
+    print "col => show the list of collaborators from the repository\n"
     print "help => list of commands available\n\n"
 
   end
